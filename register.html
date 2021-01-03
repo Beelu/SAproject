@@ -103,36 +103,114 @@
 	<div class="wraper">
 		<!-- header -->
 
-<div class="d-flex justify-content-center position">
-	<div class="card" style="width:30%">
-		<div class="card-header">
-			<h3>Sign Up</h3>
-		</div>
-		<div class="card-body">
-			<form action="#" method="GET">
-				<div class="input-group form-group">
-					<div class="input-group-prepend">
-						<span class="input-group-text"><i class="fas fa-user"></i></span>
-					</div>
-					<input type="email" name="username" placeholder="username" class="form-control" required>
-				</div>
-				<div class="input-group form-group">
-					<div class="input-group-prepend">
-						<span class="input-group-text"><i class="fas fa-key"></i></span>
-					</div>
-					<input type="password" name="password" placeholder="password" class="form-control" required>
-				</div>
-				<div class="input-group form-group">
-					<div class="input-group-prepend">
-						<span class="input-group-text"><i class="fas fa-envelope"></i></span>
-					</div>
-					<input type="email" name="email" placeholder="email(please use gmail)" class="form-control" required>
-				</div>
+<div class="container mt-5">
+	<div id="flashMessage" class="message" style="display: none;"></div>
 
-				<div class="form-group">
-					<input type="submit" value="Sign Up" class="btn float-right btn-outline-info">
-				</div>
-			</form>
+	<div class="d-flex justify-content-center position">
+		<div class="card" style="width:30%">
+			<div class="card-header">
+				<h3>Sign Up</h3>
+			</div>
+			<div class="card-body">
+				<form id="form">
+					<div class="input-group form-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fas fa-user"></i></span>
+						</div>
+						<input type="text" name="username" placeholder="username" class="form-control" id="member_name" required>
+					</div>
+					<div class="input-group form-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fas fa-key"></i></span>
+						</div>
+						<input type="password" name="password" placeholder="password" class="form-control" id="member_password"
+							required>
+					</div>
+					<div class="input-group form-group">
+						<div class="input-group-prepend">
+							<span class="input-group-text"><i class="fas fa-envelope"></i></span>
+						</div>
+						<input type="email" name="email" placeholder="email(please use gmail)" class="form-control"
+							id="member_email" required>
+					</div>
+
+					<div class="form-group">
+						<input type="button" id="signup" value="Sign Up" class="btn float-right btn-outline-info">
+					</div>
+				</form>
+			</div>
+			<script type="text/javascript">
+				$(document).ready(function () {
+					// 處理表單點擊事件：若按下註冊按鈕
+					var $form = $('#signup');
+					$form.click(function () {
+						submit();
+					});
+					$("#member_name").keypress(function (e) {
+						if (e.which == 13) {//enter
+							$form.click();//等於按submit
+						}
+					});
+					$("#member_password").keypress(function (e) {
+						if (e.which == 13) {
+							$form.click();
+						}
+					});
+					$("#member_email").keypress(function (e) {
+						if (e.which == 13) {
+							$form.click();
+						}
+					});
+					function submit() {
+						var name = $('#member_name').val();
+						var password = $('#member_password').val();
+						var email = $('#member_email').val();
+
+						var email_rule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+						var password_rule = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+
+						if (!email_rule.test(email)) {
+							alert("Email格式不符！");
+						}
+						else if (!password_rule.test(password)) {
+							alert("密碼格式不符，長度至少8，且至少包含一個數字和英文字母！");
+						}
+						else {
+							// 將資料組成JSON格式
+							var data_object = {
+								"name": name,
+								"email": email,
+								"password": password
+							};
+
+							// 將JSON格式轉換成字串
+							var data_string = JSON.stringify(data_object);
+
+							// 發出POST的AJAX請求
+							$.ajax({
+								type: "POST",
+								url: "api/member.do",
+								data: data_string,
+								crossDomain: true,
+								cache: false,
+								dataType: 'json', //剛剛已經轉換成json格式
+								timeout: 5000,
+								success: function (response) {//收到的response當做function的參數
+									if (response.status == 400)
+										$('#flashMessage').html(response.message);
+										$('#flashMessage').show();
+									if (response.status == 200) {//200請求OK
+										document.location.href = "./home.html";
+									}
+								},
+								error: function () {
+									alert("無法連線到伺服器！");
+								}
+							});
+						}
+					}
+				});
+			</script>
 		</div>
 	</div>
 </div>

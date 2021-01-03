@@ -113,43 +113,7 @@
 		</div>
 	</header>
 
-	<div class="row">
-		<div class="col-lg-3 col-sm-6 mb-5">
-			<div class="card home_book">
-				<img src="./statics/img/book/c.jpg" class="card-img-top">
-				<div class="card-body">
-					<h5 class="card-title">C語言教學手冊</h5>
-					<button type="button" class="btn btn-outline-secondary">Share More!</button>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-3 col-sm-6 mb-5">
-			<div class="card home_book">
-				<img src=" ./statics/img/book/go.jpg" class="card-img-top">
-				<div class="card-body">
-					<h5 class="card-title">The Way To GO</h5>
-					<a href="#" class="btn btn-outline-secondary">Share More!</a>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-3 col-sm-6 mb-5">
-			<div class="card home_book">
-				<img src="./statics/img/book/java.jpg" class="card-img-top">
-				<div class="card-body">
-					<h5 class="card-title">Java教科書</h5>
-					<a href="#" class="btn btn-outline-secondary">Share More!</a>
-				</div>
-			</div>
-		</div>
-		<div class="col-lg-3 col-sm-6 mb-5">
-			<div class="card home_book">
-				<img src="./statics/img/book/python.jpg" class="card-img-top">
-				<div class="card-body">
-					<h5 class="card-title">python教科書</h5>
-					<a href="#" class="btn btn-outline-secondary">Share More!</a>
-				</div>
-			</div>
-		</div>
+	<div class="row" id="product_panel">
 	</div>
 </div>
 
@@ -183,6 +147,12 @@
 			timeout: 5000,
 			success: function (response) {
 				console.log(response);
+				var product_panel = "";
+				$.each(response.response.data, function () {
+					product_panel += addProduct(this);
+				})
+
+				$("#product_panel").append(product_panel);
 			},
 			error: function () {
 				alert("無法連線到伺服器！");
@@ -207,6 +177,18 @@
 		var search_text = $('#search_text').val();
 		document.location.href = "./home.html?s=" + search_text;
 	}
+
+	function addProduct(data) {
+			let inner_html = '';
+			inner_html += '<div class="col-lg-3 col-sm-6 mb-5">';
+			inner_html += '<div class="card">';
+			inner_html += '<img src=' + data.image + ' class="card-img-top">';
+			inner_html += '<div class="card-body">';
+			inner_html += '<h5 class="card-title">' + data.name + ' </h5>';
+			inner_html += '<a href="./show.html?id='+ data.id + '&s=detail" class="btn btn-outline-secondary">Show More!</a>';
+			inner_html += '</div></div></div></div></div>';
+			return inner_html;
+		}
 </script>
 
 <!-- footer -->
