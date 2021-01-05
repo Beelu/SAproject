@@ -87,9 +87,10 @@ public class OrderController extends HttpServlet {
 	    /** 透過 JsonReader 類別將 Request 之 JSON 格式資料解析並取回 */
         JsonReader jsr = new JsonReader(request);
         JSONObject jso = jsr.getObject();
+        System.out.println(jso);
 
         /** 取出經解析到 JSONObject 之 Request 參數 */
-        int peopleID = jso.getInt("peopleID");
+        int peopleID = jso.getInt("id");
         JSONArray item = jso.getJSONArray("item");
         
         /** 建立一個新的訂單物件 */
@@ -99,12 +100,13 @@ public class OrderController extends HttpServlet {
         JSONObject result = oh.create(od);
 
         /** 設定回傳回來的訂單編號與訂單細項編號 */
-        od.setId((int) result.getLong("order_id"));
+        int receipt_id = (int) result.getLong("order_id");
+        od.setId(receipt_id);
 
         /** 將每本在訂單內的書設定rented跟receiptID */
         for(int i=0 ; i < item.length() ; i++) {
             int book_id = Integer.parseInt(item.getString(i));
-            ph.update(book_id);
+            ph.update(receipt_id, book_id);
             
             /** 透過 ProductHelper 物件之 getById()，取得產品的資料並加進訂單物件裡 */
             Product pd = ph.getById(Integer.toString(book_id));

@@ -546,7 +546,7 @@ public class ProductHelper {
     }
     
     //書本被借走或被歸還時更改狀態
-    public JSONObject update(int receipt_id) {
+    public JSONObject update(int receipt_id, int book_id) {
     	/** 紀錄回傳之資料 */
         JSONArray jsa = new JSONArray();
         /** 記錄實際執行之SQL指令 */
@@ -566,6 +566,7 @@ public class ProductHelper {
             pres = conn.prepareStatement(sql);
             pres.setBoolean(1, true);
             pres.setInt(2, receipt_id);
+            pres.setInt(3, book_id);
             /** 執行更新之SQL指令並記錄影響之行數 */
             row = pres.executeUpdate();
 

@@ -66,6 +66,12 @@
 						navbar_right += '<i class="fas fa-address-book"></i> ' + response.response.name + '</a></li>';
 						navbar_right += '<li class="nav-item"><a id="logout" class="nav-link" href="#">';
 						navbar_right += '<i class="fas fa-address-book"></i> Logout</a></li>';
+
+						$("#reserve").show();
+						if (response.response.isManager) {
+							$("#edit").show();
+							$("#del").show();
+						}
 					}
 
 					$("#navbar_left").append(navbar_left);
@@ -102,52 +108,217 @@
 
 	<div class="wraper">
 		<!-- header -->
-<div class="container m-5">
+		
+	<div class="container" style="margin-bottom: 5%;">
     <div class="row">
         <div class="position col-lg-9 col-sm-12">
-			<div class="card mb-3" style="max-width: 80%;">
-				<div class="row g-0">
-					<div class="col-sm-2">
-						<img src="./statics/img/book/go.jpg" class="cartimg justify-content-center">
-					</div>
-					<div class="col-sm-10">
-						<div class="card-body justify-content-center">
-							<h5 class="card-title">The Way To GO</h5>
-							<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="card mb-3" style="max-width: 80%;">
-				<div class="row g-0">
-					<div class="col-sm-2">
-						<img src="./statics/img/book/c.jpg" class="cartimg justify-content-center">
-					</div>
-					<div class="col-sm-10">
-						<div class="card-body justify-content-center">
-							<h5 class="card-title">C語言教學手冊</h5>
-							<p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content.</p>
-						</div>
-					</div>
-				</div>
+			<div class="row" id="cart_panel">
 			</div>
         </div>
         <div class="position col-lg-3">
             <div class="card" style="width: 18rem;">
                 <div class="card-header"> 詳細資訊 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">書本總數：2</li>
-                    <li class="list-group-item">書本名稱:<br/>-The Way To GO<br/>-C語言教學手冊</li>
-                </ul>
+									<li class="list-group-item">書本總數 :
+										<span id="amount" class="text-success">0</span>
+									</li>
+									<li class="list-group-item">書本名稱 : <br/>
+										<p id="cart_list" class="text-success">購物車內沒有任何書本!</p>
+									</li>
+								</ul>
+				
                 <div class="card-footer">
-                    <button type="button" class="btn btn-success">預訂</button>
+										<button id="rent" type="button" class="btn btn-success">預訂</button>
+										<button id="clean" type="button" class="btn btn-success">清空購物車</button>
                 </div>
             </div>
         </div>
     </div>
-</div>  
+	</div>  
+
+
+<script>
+	//進來先取出localstorage資料
+	var [client_cart_obj, amount]  = getCartDataFromClient();
+
+	if (client_cart_obj.length == 0) {
+			alert("購物車內沒有任何書本！");
+			calcSummaryInformation();
+			setButtonState("rent", false);
+		}
+	else
+		getCartProduct();
+		
+	//確認預定按鈕功能
+	$("#rent").click(function () {
+		var check = window.confirm("確認預定？");
+		if (check == true) {
+			var data = {
+					"id": $.cookie('id'),
+					"item": client_cart_obj,
+			}
+			// 驗證輸入的資料
+			var data_string = JSON.stringify(data);
+
+			// 發出POST的AJAX請求
+			$.ajax({
+				type: "POST",
+				url: "api/order.do",
+				data: data_string,
+				crossDomain: true,
+				cache: false,
+				dataType: 'json',
+				timeout: 5000,
+				success: function (response) {
+					alert("新增訂單成功!")
+				},
+				error: function () {
+					alert("無法連線到伺服器！");
+				}
+			});
+		}
+	});
+	
+	//清空購物車按鈕功能
+	$("#clean").click(function () {
+		console.log("清空購物車");
+		cleanAllData();
+		document.location.href = "./cart.html";
+	});
+	
+	function cleanAllData() {
+		client_cart_obj = [];
+		client_cart_amount = [];
+		updateCartDataToClent();
+		$("#cart_table").empty();
+		$("#amount").html('0');
+		$("#cart_list").empty();
+		setButtonState("rent", false);
+	}
+	
+	//取得所有在localstorage內書本
+	function getCartProduct() {
+		$.ajax({
+			type: "GET",
+			url: "api/product.do",
+			crossDomain: true,
+			cache: false,
+			data: "id_list=" + client_cart_obj.toString(),
+			dataType: 'json',
+			timeout: 5000,
+			success: function (response) {
+				if (response.status == 200) {
+					console.log(response);
+					setCartPanel(response.response.data);
+					setCartList(response.response.data);
+					calcSummaryInformation();
+				}
+			},
+			error: function () {
+				alert("無法連線到伺服器！");
+			}
+		});
+	}
+
+	//列出所有書本(左邊)
+	function setCartPanel(data){
+		var cart_panel = "";
+		$.each(data, function (index, value) {
+			cart_panel += addCartProduct(value);
+		});
+		
+		$("#cart_panel").append(cart_panel);
+	}
+	
+	function addCartProduct(value){
+		let inner_html = '<div id="row_' + value.id + '" class="card mb-3" style="max-width: 80%;">';
+		inner_html += '<div class="row g-0">';
+		inner_html += '<div class="col-sm-2">';
+		inner_html += '<img src=' + value.image + ' class="cartimg justify-content-center"></div>';
+		inner_html += '<div class="col-sm-10">';
+		inner_html += '<div class="card-body justify-content-center">';
+		inner_html += '<h5 class="card-title">' + value.name + '</h5>';
+		inner_html += '<a href="javascript: deletebook(' + value.id + ');" type="button" class="btn btn-success">刪除</a>'
+		inner_html += '</div></div></div></div>';
+		return inner_html;
+	}
+
+	//從購物車刪除書本
+	function deletebook(id){
+		var cart = JSON.parse(localStorage.getItem('client_cart_obj'));
+		for (var i = 0; i < cart.length; i++) {
+			if (cart[i] == id) {
+				alert(i);
+				cart.splice(i, 1);
+			}
+		}
+		localStorage.setItem('client_cart_obj', JSON.stringify(cart));
+		document.location.href = "./cart.html";
+	}
+	
+	//從localstorage取出資料
+	function getCartDataFromClient() {
+		let cart = JSON.parse(localStorage.getItem("client_cart_obj"));
+		let amount = JSON.parse(localStorage.getItem("client_cart_obj.length"));
+		cart = !cart ? new Array() : cart;
+		return [cart, amount];
+	}
+	
+	//設定localstorage的值
+	function updateCartDataToClent() {
+		localStorage.setItem("client_cart_obj", JSON.stringify(client_cart_obj));
+	}
+
+	//
+	function calcSummaryInformation() {
+		var amount = client_cart_obj.length;
+		for(var i=0 ; i < amount ; i++) {
+			var id = client_cart_obj[i];
+		}
+			// Client端日期
+		var date = new Date();
+		var iso_date = date.toISOString();
+	
+		$("#date").html(iso_date.substring(0, 10));
+		$("#amount").html(amount);
+	}
+	
+	function setCartList(data){
+		var cart_list ='';
+		$("#cart_list").empty();
+		$.each(data, function(index, value) {
+			cart_list += '<hr>';
+			cart_list += '>' + value.name; 
+			cart_list += '<br>';
+		});
+		
+		$("#cart_list").html(cart_list);
+	}
+	
+	//設定按鈕可否被點
+	function setButtonState(id, action) {
+		if (!action) {
+			$('#' + id).prop('disabled', true);
+			$('#' + id).addClass('disabled');
+			$('#' + id).html('請先新增商品');
+		}
+		else {
+			$('#' + id).prop('disabled', false);
+			$('#' + id).removeClass('disabled');
+			$('#' + id).html('結帳');
+		}
+	}
+	
+
+	</script>
+
+
 
 <!-- footer -->
-</div>
+	</div>
 <div id="footer_partials"></div>
 <script>$('#footer_partials').load('partials/footer.html')</script>
+
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>
