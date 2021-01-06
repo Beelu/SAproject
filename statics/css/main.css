@@ -40,7 +40,7 @@ hr {
 }
 
 .cartimg {
-  max-height: 9vw;
+  max-height: 12vw;
 }
 
 footer.pt-5.pb-2 {
@@ -93,5 +93,12 @@ textarea.form-control {
   background-color: #dff0d8;
   border-color: #d6e9c6;
   border-width: 2px 5px;
+  border-style: solid;
+}
+
+.cartcard {
+  border-radius: 10px;
+  border-color: #f9faf9;
+  border-width: 4px;
   border-style: solid;
 }

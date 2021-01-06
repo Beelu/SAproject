@@ -109,7 +109,7 @@
 	<div class="wraper">
 		<!-- header -->
 		
-	<div class="container" style="margin-bottom: 5%;">
+	<div class="container mt-5 mb-5" style="margin-bottom: 5%;">
     <div class="row">
         <div class="position col-lg-9 col-sm-12">
 			<div class="row" id="cart_panel">
@@ -231,15 +231,14 @@
 	}
 	
 	function addCartProduct(value){
-		let inner_html = '<div id="row_' + value.id + '" class="card mb-3" style="max-width: 80%;">';
-		inner_html += '<div class="row g-0">';
-		inner_html += '<div class="col-sm-2">';
-		inner_html += '<img src=' + value.image + ' class="cartimg justify-content-center"></div>';
-		inner_html += '<div class="col-sm-10">';
-		inner_html += '<div class="card-body justify-content-center">';
-		inner_html += '<h5 class="card-title">' + value.name + '</h5>';
-		inner_html += '<a href="javascript: deletebook(' + value.id + ');" type="button" class="btn btn-success">刪除</a>'
-		inner_html += '</div></div></div></div>';
+		var inner_html = '<div class="card mb-3 cartcard" style="max-width: 85%;"><div class="row g-0">';
+		inner_html +=	'<div class="col-md-4"><img class="cartimg" src="' + value.image + '"></div>';
+		inner_html +=	'<div class="col-md-8"><div class="card-body">';
+		inner_html +=	'<h5 class="card-title">' + value.name + '</h5>';
+		inner_html +=	'<p class="card-text">' + value.describe.substring(0, 50) + '...';
+		inner_html += '<a href="./show.html?id=' + value.id + '&s=detail">Show More</a></p>';
+		inner_html += '<a href="javascript: deletebook(' + value.id + ');" type="button" class="btn btn-success">刪除</a>';
+		inner_html +=	'</div></div></div></div>';
 		return inner_html;
 	}
 
