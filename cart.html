@@ -57,7 +57,7 @@
 						navbar_right += '<li class="nav-item"><a class="nav-link" href="./login.html"><i class="fas fa-address-book"></i> login</a></li>';
 					} else if (response.status == 200) {
 						navbar_left += '<li class="nav-item"><a class="nav-link" href="./cart.html">Cart</a></li>';
-						navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html">Receipt</a></li>';
+						navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html?id=' + response.response.id + '">Receipt</a></li>';
 						if (response.response.isManager) {
 							navbar_left += '<li class="nav-item"><a class="nav-link" href="./manage.html">Manage</a></li>';
 						}
@@ -66,16 +66,12 @@
 						navbar_right += '<i class="fas fa-address-book"></i> ' + response.response.name + '</a></li>';
 						navbar_right += '<li class="nav-item"><a id="logout" class="nav-link" href="#">';
 						navbar_right += '<i class="fas fa-address-book"></i> Logout</a></li>';
-
-						$("#reserve").show();
-						if (response.response.isManager) {
-							$("#edit").show();
-							$("#del").show();
-						}
 					}
 
 					$("#navbar_left").append(navbar_left);
 					$("#navbar_right").append(navbar_right);
+
+					$.cookie('id', response.response.id, { expires: 1, path: './cart.html' });
 				},
 				error: function () {
 					alert("無法連線到伺服器！");
@@ -90,6 +86,7 @@
 			});
 		});
 	</script>
+
 	<!-- 上面資訊排 -->
 	<nav class="navbar navbar-expand-md navbar-light">
 		<div class="container">
@@ -171,6 +168,7 @@
 				timeout: 5000,
 				success: function (response) {
 					alert("新增訂單成功!")
+					cleanAllData();
 				},
 				error: function () {
 					alert("無法連線到伺服器！");
@@ -247,7 +245,6 @@
 		var cart = JSON.parse(localStorage.getItem('client_cart_obj'));
 		for (var i = 0; i < cart.length; i++) {
 			if (cart[i] == id) {
-				alert(i);
 				cart.splice(i, 1);
 			}
 		}

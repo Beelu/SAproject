@@ -57,7 +57,7 @@
             navbar_right += '<li class="nav-item"><a class="nav-link" href="./login.html"><i class="fas fa-address-book"></i> login</a></li>';
           } else if (response.status == 200) {
             navbar_left += '<li class="nav-item"><a class="nav-link" href="./cart.html">Cart</a></li>';
-            navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html?id=' + id + '">Receipt</a></li>';
+            navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html?id=' + response.response.id + '">Receipt</a></li>';
             if (response.response.isManager) {
               navbar_left += '<li class="nav-item"><a class="nav-link" href="./manage.html">Manage</a></li>';
             }
@@ -90,6 +90,39 @@
       var url = new URL(url_string);
       var id = url.searchParams.get("id");
 
+    //===============功能實作================
+      function deleteReceipt(id) {
+        var check = window.confirm("確認刪除訂單？");
+        if (check == true) {
+          console.log("You pressed OK!");
+          var request = { 'id': id };
+          var data_string = JSON.stringify(request);
+          $.ajax({
+            type: "DELETE",
+            url: "api/order.do",
+            crossDomain: true,
+            data: data_string,
+            cache: false,
+            dataType: 'json',
+            timeout: 5000,
+            success: function (response) {
+              if (response.status == 200) {
+                $("#flashMessage-success").html("成功! 已經成功刪除訂單");
+                $("#flashMessage-success").show();
+                getReceipt(id);
+              }
+              console.log(response);
+            },
+            error: function () {
+              alert("無法連線到伺服器！");
+            }
+          });
+        }
+        else {
+          console.log("You pressed Cancel!");
+        }
+      }
+
     function getReceipt(id) {
         // 發出POST的GET請求取得所有會員列表
         $.ajax({
@@ -120,8 +153,7 @@
           table_html += '<tr><td scope="row">' + value['order_info']['id'] + '</td>';
           table_html += '<td>' + value['order_info']['createTime'] + '</td>';
           table_html += '<td>' + value['order_info']['peopleID'] + '</td>';
-          table_html += '<td>' + '<a href="./receipt_detail.html?id=' + value['order_info']['id'] + '">詳細</a> | ';
-          table_html += '<a href="javascript: deleteReceipt(' + value['order_info']['id'] + ');">刪除</a></td></tr>';
+          table_html += '<td>' + '<a href="./receipt_detail.html?id=' + value['order_info']['id'] + '">詳細</a></td></tr>';
         })
 
         $("#table > tbody").append(table_html);

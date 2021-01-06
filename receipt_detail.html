@@ -57,7 +57,7 @@
                         navbar_right += '<li class="nav-item"><a class="nav-link" href="./login.html"><i class="fas fa-address-book"></i> login</a></li>';
                     } else if (response.status == 200) {
                         navbar_left += '<li class="nav-item"><a class="nav-link" href="./cart.html">Cart</a></li>';
-                        navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html">Receipt</a></li>';
+                        navbar_left += '<li class="nav-item"><a class="nav-link" href="./receipt.html?id=' + response.response.id + '">Receipt</a></li>';
                         if (response.response.isManager) {
                             navbar_left += '<li class="nav-item"><a class="nav-link" href="./manage.html">Manage</a></li>';
                         }
